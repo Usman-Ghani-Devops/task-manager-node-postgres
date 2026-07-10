@@ -1,57 +1,348 @@
-# Task Manager - Node.js, Express & PostgreSQL
+# Task Manager Node PostgreSQL
 
-A containerized Task Management web application built with **Node.js**, **Express**, and **PostgreSQL**. This project is being developed as part of a Docker containerization assignment and follows Docker best practices through incremental stages.
+A simple Task Management web application built with **Node.js**, **Express.js**, **EJS**, and **PostgreSQL**. This project is being developed as part of a Docker containerization assignment, where the application is containerized incrementally while learning Docker fundamentals.
 
-## Project Overview
+---
 
-The application allows users to manage their daily tasks by creating, updating, completing, and deleting tasks. The primary goal of this project is to demonstrate how to containerize a multi-service application using Docker and Docker Compose.
+# Project Objectives
 
-## Technologies
+The goals of this project are to:
 
-- Node.js
-- Express.js
-- PostgreSQL
-- Docker
-- Docker Compose
-- Nginx (Stage 5)
+* Build a simple CRUD Task Manager application.
+* Store task data in PostgreSQL.
+* Learn Docker by containerizing the application step by step.
+* Follow Docker best practices throughout multiple stages.
 
-## Project Goals
+---
 
-- Containerize a Node.js application
-- Connect the application with PostgreSQL
-- Optimize Docker images using multi-stage builds
-- Persist database data using Docker volumes
-- Configure services using environment variables
-- Add health checks
-- Deploy behind an Nginx reverse proxy
-- Publish the application image to Docker Hub
+# Features
 
-## Project Structure
+* Create a new task
+* View all tasks
+* Edit existing tasks
+* Delete tasks
+* Store tasks in PostgreSQL
+* Server-side rendering using EJS
+* Dockerized Node.js application
 
-```
+---
+
+# Technology Stack
+
+| Technology | Purpose             |
+| ---------- | ------------------- |
+| Node.js    | Runtime environment |
+| Express.js | Web framework       |
+| PostgreSQL | Database            |
+| EJS        | Template engine     |
+| Docker     | Containerization    |
+
+---
+
+# Project Structure
+
+```text
 task-manager-node-postgres/
 │
-├── src/
+├── database/
+│   └── init.sql
+│
 ├── public/
-├── package.json
-├── README.md
+│   ├── css/
+│   ├── images/
+│   └── js/
+│
+├── src/
+│   ├── config/
+│   │   └── db.js
+│   │
+│   ├── controllers/
+│   │   └── taskController.js
+│   │
+│   ├── middleware/
+│   │
+│   ├── models/
+│   │   └── taskModel.js
+│   │
+│   ├── routes/
+│   │   └── taskRoutes.js
+│   │
+│   ├── views/
+│   │   ├── layouts/
+│   │   ├── partials/
+│   │   ├── add-task.ejs
+│   │   ├── edit-task.ejs
+│   │   └── index.ejs
+│   │
+│   ├── app.js
+│   └── server.js
+│
+├── .dockerignore
 ├── .gitignore
-└── .dockerignore
+├── Dockerfile
+├── package.json
+├── package-lock.json
+└── README.md
 ```
 
-## Development Roadmap
+---
 
-- [x] Stage 0 - Project Setup
-- [ ] Stage 1 - Dockerize the Node.js Application
-- [ ] Stage 2 - Optimize the Docker Image
-- [ ] Stage 3 - Add PostgreSQL with Docker Compose
-- [ ] Stage 4 - Persistence, Configuration & Health Checks
-- [ ] Stage 5 - Nginx Reverse Proxy & Docker Hub
+# Prerequisites
 
-## Current Status
+Before running the project, install:
 
-🚧 Stage 0 - Project Setup
+* Docker
+* Git
+* Node.js (only for local development)
 
-## License
+---
 
-This project is developed for educational purposes.
+# Stage 0 – Project Setup
+
+## Completed Tasks
+
+* Created GitHub repository.
+* Created Express.js application.
+* Configured PostgreSQL database.
+* Implemented CRUD operations.
+* Added EJS templates.
+* Created project folder structure.
+* Added `.gitignore`.
+* Added `.dockerignore`.
+* Added project documentation.
+
+---
+
+# Running the Application Locally
+
+Install project dependencies:
+
+```bash
+npm install
+```
+
+Start the application:
+
+```bash
+npm run dev
+```
+
+The application will be available at:
+
+```text
+http://localhost:3000
+```
+
+---
+
+# Stage 1 – First Container
+
+## Objective
+
+Containerize the Node.js application by:
+
+* Writing a Dockerfile.
+* Building a Docker image.
+* Running the application inside a Docker container.
+* Exposing the application using port mapping.
+* Verifying the application from a browser or using curl.
+
+---
+
+# Dockerfile
+
+```dockerfile
+FROM node:22
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+---
+
+# Build the Docker Image
+
+Navigate to the project directory and build the image.
+
+```bash
+docker build -t task-manager:v1 .
+```
+
+---
+
+# Verify the Image
+
+List available Docker images.
+
+```bash
+docker images
+```
+
+Expected output:
+
+```text
+REPOSITORY      TAG
+task-manager    v1
+```
+
+---
+
+# Run the Container
+
+Run the application container.
+
+```bash
+docker run -d \
+--name frontend-container \
+-p 3000:3000 \
+task-manager:v1
+```
+
+---
+
+# Verify the Running Container
+
+List running containers.
+
+```bash
+docker ps
+```
+
+---
+
+# View Container Logs
+
+```bash
+docker logs frontend-container
+```
+
+---
+
+# Access the Running Container
+
+```bash
+docker exec -it frontend-container sh
+```
+
+Exit the container:
+
+```bash
+exit
+```
+
+---
+
+# Stop the Container
+
+```bash
+docker stop frontend-container
+```
+
+---
+
+# Remove the Container
+
+```bash
+docker rm frontend-container
+```
+
+---
+
+# Verify the Application
+
+Open your browser and visit:
+
+```text
+http://localhost:3000
+```
+
+Or verify using curl:
+
+```bash
+curl http://localhost:3000
+```
+
+If the application responds successfully, the container has been built and is running correctly.
+
+---
+
+# Docker Commands Used
+
+| Command         | Purpose                      |
+| --------------- | ---------------------------- |
+| `docker build`  | Build Docker image           |
+| `docker images` | List Docker images           |
+| `docker run`    | Create and start a container |
+| `docker ps`     | Show running containers      |
+| `docker logs`   | Display container logs       |
+| `docker exec`   | Enter a running container    |
+| `docker stop`   | Stop a container             |
+| `docker rm`     | Remove a container           |
+
+---
+
+# Files Added for Docker
+
+## Dockerfile
+
+Defines how the Docker image is built.
+
+## .dockerignore
+
+Excludes unnecessary files (such as `node_modules`) from the Docker build context.
+
+## .gitignore
+
+Prevents unnecessary files from being committed to Git.
+
+---
+
+# Learning Outcomes
+
+By completing Stage 0 and Stage 1, the following concepts were learned:
+
+* Basic Express.js application structure
+* PostgreSQL integration
+* MVC project organization
+* Docker images
+* Docker containers
+* Dockerfile instructions (`FROM`, `WORKDIR`, `COPY`, `RUN`, `EXPOSE`, `CMD`)
+* Building Docker images
+* Running containers
+* Port mapping
+* Viewing logs
+* Accessing running containers
+* Basic Docker workflow
+
+---
+
+# Future Work
+
+Upcoming stages will focus on:
+
+* Docker layer caching
+* Optimizing image size
+* Multi-stage builds
+* Non-root containers
+* Docker networking
+* Docker Compose
+* Persistent volumes
+* Health checks
+* Production deployment
+
+---
+
+# Author
+
+**Usman Ghani**
+
+BS Software Engineering
+
+Docker Learning Project
