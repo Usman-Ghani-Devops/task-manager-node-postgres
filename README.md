@@ -1,51 +1,82 @@
 # Task Manager Node PostgreSQL
 
-A simple Task Management web application built with **Node.js**, **Express.js**, **EJS**, and **PostgreSQL**.
+A containerized **Task Management** web application built with **Node.js**, **Express.js**, **EJS**, and **PostgreSQL**. This project was developed as part of a Docker containerization assignment, where the application was containerized incrementally by following Docker best practices through multiple stages.
 
-This project is developed as part of a Docker containerization assignment where the application is containerized incrementally while learning Docker fundamentals, optimization techniques, and production deployment practices.
-
----
-
-# Project Objectives
-
-The goals of this project are:
-
-* Build a simple CRUD Task Manager application.
-* Store task data in PostgreSQL.
-* Learn Docker by containerizing the application step by step.
-* Follow Docker best practices.
-* Optimize Docker images.
-* Run multi-container applications using Docker Compose.
+The project demonstrates how to package an application into Docker containers, optimize container images, orchestrate multiple services with Docker Compose, persist database data using Docker volumes, monitor container health, and deploy a production-ready multi-container application behind an Nginx reverse proxy.
 
 ---
 
-# Features
+## Project Objectives
 
-* Create a new task
-* View all tasks
-* Edit existing tasks
-* Delete tasks
-* Store tasks in PostgreSQL
-* Server-side rendering using EJS
-* Dockerized Node.js application
-* Optimized production Docker image
+This project demonstrates the following Docker concepts:
 
----
-
-# Technology Stack
-
-| Technology | Purpose |
-|------------|---------|
-| Node.js | Runtime environment |
-| Express.js | Web framework |
-| PostgreSQL | Database |
-| EJS | Template engine |
-| Docker | Containerization |
-| Docker Compose | Multi-container orchestration |
+- Writing Dockerfiles
+- Building Docker images
+- Running containers
+- Multi-stage Docker builds
+- Image optimization
+- Running containers as non-root users
+- Using `.dockerignore`
+- Docker Compose
+- Multi-container applications
+- Docker networking
+- Environment variables
+- PostgreSQL containerization
+- Persistent Docker volumes
+- Database initialization scripts
+- Health checks
+- Docker Hub image publishing
+- Nginx Reverse Proxy
 
 ---
 
-# Project Structure
+## Features
+
+- Create new tasks
+- View all tasks
+- Update existing tasks
+- Delete tasks
+- PostgreSQL database integration
+- Server-side rendering using EJS
+- Dockerized application
+- Multi-stage Docker build
+- Optimized production image
+- Non-root container execution
+- Docker Compose orchestration
+- Persistent database storage
+- PostgreSQL health monitoring
+- Nginx Reverse Proxy
+- Docker Hub deployment
+
+---
+
+## Tech Stack
+
+### Backend
+
+- Node.js
+- Express.js
+
+### Frontend
+
+- EJS
+- HTML
+- CSS
+
+### Database
+
+- PostgreSQL 17
+
+### DevOps & Containerization
+
+- Docker
+- Docker Compose
+- Nginx
+- Docker Hub
+
+---
+
+## Project Structure
 
 ```text
 task-manager-node-postgres/
@@ -53,38 +84,20 @@ task-manager-node-postgres/
 ├── database/
 │   └── init.sql
 │
-├── public/
-│   ├── css/
-│   ├── images/
-│   └── js/
+├── nginx/
+│   └── nginx.conf
 │
 ├── src/
 │   ├── config/
-│   │   └── db.js
-│   │
 │   ├── controllers/
-│   │   └── taskController.js
-│   │
-│   ├── middleware/
-│   │
 │   ├── models/
-│   │   └── taskModel.js
-│   │
 │   ├── routes/
-│   │   └── taskRoutes.js
-│   │
 │   ├── views/
-│   │   ├── layouts/
-│   │   ├── partials/
-│   │   ├── add-task.ejs
-│   │   ├── edit-task.ejs
-│   │   └── index.ejs
-│   │
-│   ├── app.js
-│   └── server.js
+│   └── app.js
 │
 ├── .dockerignore
-├── .gitignore
+├── .env
+├── compose.yml
 ├── Dockerfile
 ├── package.json
 ├── package-lock.json
@@ -93,106 +106,186 @@ task-manager-node-postgres/
 
 ---
 
-# Prerequisites
-
-Install the following tools:
-
-* Docker
-* Git
-* Node.js (only for local development)
-
----
-
-# Stage 0 – Project Setup
-
-## Completed Tasks
-
-* Created GitHub repository.
-* Created Express.js application.
-* Configured PostgreSQL database.
-* Implemented CRUD operations.
-* Added EJS templates.
-* Created MVC project structure.
-* Added `.gitignore`.
-* Added `.dockerignore`.
-* Added project documentation.
-
----
-
-# Running Application Locally
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start application:
-
-```bash
-npm run dev
-```
-
-Application runs at:
+## Architecture
 
 ```text
-http://localhost:3000
+                 Browser
+                     │
+                     ▼
+              Nginx Reverse Proxy
+                     │
+                     ▼
+            Node.js Express App
+                     │
+                     ▼
+               PostgreSQL Database
+                     │
+                     ▼
+            Docker Named Volume
 ```
 
 ---
 
-# Stage 1 – First Container
+## Prerequisites
 
-## Objective
+Before running this project, ensure the following software is installed:
 
-Containerize the Node.js application by:
+- Docker Engine
+- Docker Compose
+- Git
 
-* Writing a Dockerfile.
-* Building the Docker image.
-* Running the application inside a container.
-* Exposing the application through port mapping.
-* Verifying the application using browser or curl.
+Verify the installation:
 
----
-
-# Dockerfile (Stage 1)
-
-```dockerfile
-FROM node:22
-
-WORKDIR /app
-
-COPY . .
-
-RUN npm install
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
+```bash
+docker --version
+docker compose version
+git --version
 ```
 
 ---
 
-# Build Docker Image
+## Clone the Repository
+
+```bash
+git clone https://github.com/Usman-Ghani-Devops/task-manager-node-postgres.git
+
+cd task-manager-node-postgres
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root.
+
+```env
+PORT=3000
+
+DB_HOST=postgres-db
+DB_PORT=5432
+DB_NAME=taskdb
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+POSTGRES_DB=taskdb
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+```
+
+These variables are used by both the application container and the PostgreSQL container to establish a database connection without hardcoding sensitive configuration values.
+
+---
+
+## Development Roadmap
+
+The project was completed incrementally through the following stages:
+
+- **Stage 0** — Project Setup
+- **Stage 1** — First Docker Container
+- **Stage 2** — Image Optimization
+- **Stage 3** — Docker Compose & PostgreSQL
+- **Stage 4** — Persistent Storage & Health Checks
+- **Stage 5** — Docker Hub & Nginx Reverse Proxy
+
+Each stage is documented in detail in the following sections.
+
+---
+
+# Stage 0 — Project Setup
+
+The first stage focused on preparing the repository for containerization by organizing the project structure and adding the necessary configuration files.
+
+## Tasks Completed
+
+- Created the Git repository
+- Added the Node.js Task Manager application
+- Added a `.gitignore` file
+- Added a `.dockerignore` file
+- Created the initial `README.md`
+- Verified the application runs correctly before containerization
+
+## .gitignore
+
+The `.gitignore` file prevents unnecessary files from being tracked by Git.
+
+Example:
+
+```gitignore
+node_modules/
+.env
+```
+
+## .dockerignore
+
+The `.dockerignore` file reduces the Docker build context by excluding files that are not required inside the image.
+
+Example:
+
+```dockerignore
+node_modules
+.git
+.gitignore
+README.md
+.env
+Dockerfile
+compose.yml
+```
+
+### Why use `.dockerignore`?
+
+Using `.dockerignore` provides several benefits:
+
+- Reduces Docker build context
+- Speeds up image builds
+- Improves Docker layer caching
+- Prevents unnecessary files from being copied into the image
+- Produces smaller images
+
+---
+
+# Stage 1 — Containerize the Application
+
+In this stage, the application was containerized using Docker. A Dockerfile was created, the image was built, and the application was successfully executed inside a Docker container.
+
+---
+
+
+# Build the Docker Image
+
+Build the Docker image using:
 
 ```bash
 docker build -t task-manager:v1 .
 ```
 
----
-
-# Run Container
+Verify the image:
 
 ```bash
-docker run -d \
---name frontend-container \
--p 3000:3000 \
-task-manager:v1
+docker images
+```
+
+Example output:
+
+```text
+REPOSITORY          TAG       IMAGE ID
+task-manager        v1        xxxxxxxxxxxx
 ```
 
 ---
 
-# Verify Container
+# Run the Container
+
+Run the application:
+
+```bash
+docker run -d \
+--name task-manager-container \
+-p 3000:3000 \
+task-manager:v1
+```
+
+
+# Verify the Running Container
 
 List running containers:
 
@@ -200,288 +293,145 @@ List running containers:
 docker ps
 ```
 
-View logs:
+Expected output:
 
-```bash
-docker logs frontend-container
-```
-
-Access container:
-
-```bash
-docker exec -it frontend-container sh
-```
-
-Stop container:
-
-```bash
-docker stop frontend-container
-```
-
-Remove container:
-
-```bash
-docker rm frontend-container
+```text
+CONTAINER ID    IMAGE            STATUS
+xxxxxxxxxxx     task-manager:v1  Up
 ```
 
 ---
 
 # Verify Application
 
-Browser:
+Open the application in a web browser:
 
 ```text
 http://localhost:3000
 ```
 
-Using curl:
+Or verify using curl:
 
 ```bash
 curl http://localhost:3000
 ```
 
----
-
-# Stage 2 – Optimize Docker Image
-
-## Objective
-
-The goal of Stage 2 was to optimize the Docker image by:
-
-* Using a multi-stage Docker build.
-* Using a smaller base image (`node:22-slim`).
-* Installing only production dependencies.
-* Running the application as a non-root user.
-* Improving `.dockerignore`.
-* Reducing image size.
+If the application returns the HTML page successfully, the container has been built and deployed correctly.
 
 ---
 
-# Optimized Dockerfile
 
-```dockerfile
-ARG NODE_VERSION=22-slim
+## Stage 1 Summary
 
-FROM node:${NODE_VERSION} AS builder
+At the end of Stage 1, the application was successfully containerized using Docker.
 
-LABEL maintainer="Usman Ghani"
-LABEL description="Task Manager application built with Node.js and PostgreSQL"
-LABEL stage="builder"
+### Achievements
 
-WORKDIR /app/
-
-COPY package*.json ./
-
-RUN npm install --omit=dev && npm cache clean --force
-
-COPY . .
-
-FROM node:${NODE_VERSION}
-
-LABEL maintainer="Usman Ghani"
-LABEL description="Task Manager application built with Node.js and PostgreSQL"
-LABEL stage="production"
-
-WORKDIR /app/
-
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/database ./database
-
-EXPOSE 3000
-
-USER node
-
-CMD ["npm", "start"]
-```
+- Created the first Dockerfile
+- Built a Docker image
+- Started the application inside a container
+- Published the application using port mapping
+- Verified the application using both a web browser and `curl`
+- Documented all build and run commands
 
 ---
 
-# Build Optimized Image
+# Stage 2 — Optimize the Docker Image
 
-```bash
-docker build -t task-manager:v3 .
-```
+The initial Docker image successfully containerized the application but contained unnecessary files and development dependencies. In this stage, the Dockerfile was redesigned following Docker best practices to create a smaller, more secure, and production-ready image.
 
 ---
 
-# Image Size Comparison
+## Objectives
 
-Image sizes were checked using:
+- Implement a multi-stage Docker build
+- Reduce the final image size
+- Install only production dependencies
+- Run the application as a non-root user
+- Improve Docker layer caching
 
-```bash
-docker images
-```
-
-## Before Optimization
-
-| Image | Size |
-|------|------|
-| task-manager:v1 | 1.65GB |
-
-## After Optimization
-
-| Image | Size |
-|------|------|
-| task-manager:v3 | 81MB |
 
 ---
-# Optimization Improvements
 
-## 1. Multi-stage Docker Build
 
-A multi-stage Docker build was introduced to separate the image building process from the final production image.
+# Improvements Made
 
-The Dockerfile uses two stages:
+## Multi-stage Build
+
+Instead of using a single stage, the Dockerfile was divided into two stages.
 
 ### Builder Stage
 
-```dockerfile
-FROM node:${NODE_VERSION} AS builder
-```
+Responsible for:
 
-The builder stage:
-
-* Installs application dependencies.
-* Prepares the application files.
-* Handles the build preparation process.
+- Installing dependencies
+- Preparing the application files
 
 ### Production Stage
 
-```dockerfile
-FROM node:${NODE_VERSION}
-```
+Responsible for:
 
-The production stage:
+- Copying only the required files
+- Running the application
 
-* Starts from a clean image.
-* Copies only the required application files from the builder stage.
-* Excludes unnecessary build files.
-
-Example:
-
-```dockerfile
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/database ./database
-```
-
-Benefits:
-
-* Smaller final image.
-* Less unnecessary data.
-* Faster deployment.
-* Better security.
+This removes unnecessary files from the final image.
 
 ---
 
-## 2. Smaller Base Image
+## Small Base Image
 
-The original Dockerfile used:
-
-```dockerfile
-FROM node:22
-```
-
-The optimized Dockerfile uses:
+Instead of using the default Node.js image, a slim image was selected.
 
 ```dockerfile
 FROM node:22-slim
 ```
 
-The `slim` image contains only the required operating system packages instead of the complete Debian distribution.
-
 Benefits:
 
-* Reduced image size.
-* Faster image download.
-* Faster container startup.
-* Lower storage usage.
+- Smaller image size
+- Reduced attack surface
+- Faster download time
+- Faster deployment
 
 ---
 
-## 3. Install Production Dependencies Only
-
-The optimized Dockerfile installs only production dependencies:
-
-```bash
-npm install --omit=dev
-```
+## Production Dependencies Only
 
 Instead of:
 
-```bash
+```dockerfile
 npm install
 ```
 
-The difference:
+the optimized Dockerfile uses
 
-| Installation | Includes |
-|-------------|----------|
-| npm install | Production + Development dependencies |
-| npm install --omit=dev | Production dependencies only |
+```dockerfile
+npm install --omit=dev
+```
 
-Development packages such as testing tools and build utilities are excluded from the final production image.
+This excludes development dependencies
 
-Benefits:
-
-* Smaller image size.
-* Reduced attack surface.
-* Cleaner production environment.
+Only the packages required to run the application are included in the production image.
 
 ---
 
-## 4. Docker Layer Caching Optimization
+## Non-root User
 
-The Dockerfile instructions are ordered to take advantage of Docker layer caching.
-
-Optimized structure:
+The application runs as
 
 ```dockerfile
-WORKDIR /app/
-
-COPY package*.json ./
-
-RUN npm install --omit=dev && npm cache clean --force
-
-COPY . .
+USER node
 ```
 
-Why this order?
-
-Docker creates a new image layer for each instruction.
-
-The dependency installation layer changes only when:
-
-```text
-package.json
-package-lock.json
 ```
 
-changes.
+Running containers as a non-root user is considered a Docker security best practice because it reduces the impact of potential container compromises.
 
-Application code changes do not force Docker to reinstall all dependencies.
+---
 
-Example:
+## Docker Layer Caching
 
-Before optimization:
-
-```dockerfile
-COPY . .
-
-RUN npm install
-```
-
-Every code change invalidates the cache and runs:
-
-```bash
-npm install
-```
-
-again.
-
-After optimization:
+The dependency files are copied before the application source code.
 
 ```dockerfile
 COPY package*.json ./
@@ -491,143 +441,703 @@ RUN npm install --omit=dev
 COPY . .
 ```
 
-Only dependency changes trigger a new installation.
+This improves build performance.
 
-Benefits:
-
-* Faster rebuilds.
-* Better use of Docker cache.
-* Reduced build time during development.
+If only the application code changes, Docker can reuse the cached dependency layer instead of reinstalling all packages.
 
 ---
 
-## 5. Improved .dockerignore
 
-The `.dockerignore` file prevents unnecessary files from being included in the Docker build context.
+## npm Cache Cleanup
+
+After installing dependencies, the npm cache is removed.
+
+```dockerfile
+npm cache clean --force
+```
+
+Removing the npm cache helps reduce the image size by eliminating temporary installation files that are no longer needed.
+
+---
+
+# Image Size Comparison
+
+
+| Docker Image | Size |
+|--------------|------|
+| Before Optimization | 412 MB |
+| After Optimization | 81 MB |
+
+---
+
+# Why Did the Image Size Decrease?
+
+Several optimizations contributed to the reduction in image size:
+
+- Multi-stage builds removed unnecessary build files.
+- Only production dependencies were installed.
+- Development packages were excluded.
+- The npm cache was cleaned.
+- The slim Node.js base image reduced the operating system footprint.
+- Only the required application files were copied into the final image.
+
+---
+
+# Build the Optimized Image
+
+```bash
+docker build -t task-manager:v2 .
+```
+
+---
+
+# Verify the Image
+
+```bash
+docker images
+```
 
 Example:
 
 ```text
-node_modules
-.git
-.gitignore
-Dockerfile
-README.md
-.env
-npm-debug.log
-coverage
+REPOSITORY      TAG      SIZE
+task-manager    v2       81MB
 ```
 
-Benefits:
-
-* Smaller build context.
-* Faster image builds.
-* Prevents unnecessary files from entering the image.
-
 ---
 
-## 6. Run Container as Non-root User
+# Run the Optimized Container
 
-The application runs using:
-
-```dockerfile
-USER node
+```bash
+docker run -d \
+--name task-manager-container \
+-p 3000:3000 \
+task-manager:v2
 ```
 
-The official Node.js image provides a non-root user named `node`.
+---
 
-Benefits:
+# Verify the Application
 
-* Improved container security.
-* Prevents applications from running with root privileges.
-* Follows Docker production best practices.
+Open the application:
+
+```
+http://localhost:3000
+```
+
+Or use:
+
+```bash
+curl http://localhost:3000
+```
 
 ---
 
-## Final Result
+# Stage 2 Summary
 
-After applying these optimizations:
+At the end of Stage 2, the Docker image became significantly smaller, faster to build, and more secure.
 
-| Optimization | Result |
-|-------------|--------|
-| Multi-stage build | Removed unnecessary files from final image |
-| node:22-slim | Reduced base image size |
-| Production dependencies only | Removed development packages |
-| Layer caching | Faster rebuilds |
-| .dockerignore | Reduced build context |
-| Non-root user | Improved security |
+### Achievements
 
-The image size was reduced from:
-
-**1.65GB → 81MB**
-
-# Docker Commands Used
-
-| Command | Purpose |
-|---------|---------|
-| docker build | Build Docker image |
-| docker images | List Docker images |
-| docker run | Create and start container |
-| docker ps | Show running containers |
-| docker logs | View container logs |
-| docker exec | Access container |
-| docker stop | Stop container |
-| docker rm | Remove container |
-| docker inspect | View container details |
+- Implemented a multi-stage Docker build
+- Used a slim base image
+- Installed only production dependencies
+- Improved Docker layer caching
+- Removed npm cache
+- Executed the application as a non-root user
+- Reduced the overall image size
+- Created a production-ready Docker image
 
 ---
 
-# Completed Docker Concepts
+# Stage 3 — Multi-Container Application with Docker Compose
 
-By completing Stage 0, Stage 1, and Stage 2, the following concepts were learned:
+After successfully containerizing the application, the next step was to run both the application and PostgreSQL database together using Docker Compose.
 
-* Docker images and containers
-* Dockerfile instructions
-* Container port mapping
-* Docker build process
-* Image layers and caching
-* Multi-stage builds
-* Image optimization techniques
-* Production dependency installation
-* `.dockerignore`
-* Running containers as non-root users
+Docker Compose simplifies the deployment of multi-container applications by defining all services in a single configuration file.
 
 ---
 
-# Upcoming Stages
+## Objectives
 
-## Stage 3 – Docker Compose
-
-Planned:
-
-* Add PostgreSQL database service.
-* Create `docker-compose.yml`.
-* Configure services.
-* Connect application and database using Docker networking.
-* Use environment variables.
-* Add service dependency management.
+- Add a PostgreSQL database container
+- Run multiple containers with a single command
+- Create an isolated Docker network
+- Configure the application using environment variables
+- Ensure the application starts after the database
 
 ---
 
-## Stage 4 – Persistence, Configuration & Health
 
-Planned:
+# Services
 
-* Add named volumes.
-* Move secrets/configuration into `.env`.
-* Add health checks.
-* Verify database persistence.
+The Compose file consists of two services.
+
+## Application Service
+
+The application service is responsible for running the Node.js Task Manager application.
+
+Features:
+
+- Builds the image using the Dockerfile
+- Connects to the Docker network
 
 ---
 
-## Stage 5 – Ship Application
+## Database Service
 
-Planned:
+The PostgreSQL service provides persistent storage for the application.
 
-* Push Docker image to Docker Hub.
-* Add Nginx reverse proxy.
-* Document complete deployment process.
-* Add "what I would improve with more time" section.
+Features:
+
+- Uses the official PostgreSQL image
+- Initializes the database using `init.sql`
+- Shares the same Docker network as the application
+
+---
+
+# Docker Network
+
+Both containers are connected using a custom Docker bridge network.
+
+```text
+Task-Manager-network
+
+┌───────────────┐
+│ Node.js App   │
+└───────┬───────┘
+        │
+        │
+┌───────▼───────┐
+│ PostgreSQL    │
+└───────────────┘
+```
+
+Docker automatically creates DNS entries for every service.
+
+The application connects to PostgreSQL using
+
+```text
+DB_HOST=postgres-db
+```
+
+instead of using an IP address.
+
+---
+
+# Starting the Stack
+
+Build and start all services:
+
+```bash
+docker compose up 
+```
+
+Docker Compose automatically:
+
+- Builds the application image
+- Downloads PostgreSQL
+- Creates the Docker network
+- Starts PostgreSQL
+- Starts the application
+
+---
+
+# Verify Running Services
+
+```bash
+docker compose ps
+```
+
+Example:
+
+```text
+NAME            STATUS
+Task-Manager    Up
+postgres-db     Up 
+```
+
+---
+
+
+# Stage 3 Summary
+
+At the end of Stage 3, the application and PostgreSQL database were successfully deployed as a multi-container application using Docker Compose.
+
+### Achievements
+
+- Added PostgreSQL
+- Created a Docker Compose configuration
+- Connected services using a Docker network
+- Configured the application using environment variables
+- Used Docker DNS for service discovery
+- Started multiple containers using a single command
+
+---
+
+# Stage 4 — Persistence, Configuration & Health Checks
+
+Stage 4 focused on making the application more production-ready by adding persistent storage, externalizing configuration, and monitoring container health.
+
+---
+
+## Objectives
+
+- Persist PostgreSQL data
+- Initialize the database automatically
+- Move configuration into a `.env` file
+- Add container health checks
+- Ensure the application waits until PostgreSQL is ready
+
+---
+
+# Persistent Storage
+
+A named Docker volume was added.
+
+```yaml
+volumes:
+  - Task-Manager-Volume:/var/lib/postgresql/data
+```
+
+---
+
+## Why use a Docker Volume?
+
+Without a volume:
+
+```text
+Delete Container
+       ↓
+Database Lost
+```
+
+With a volume:
+
+```text
+Delete Container
+       ↓
+Volume
+       ↓
+Database Preserved
+```
+
+This ensures that data survives:
+
+- Container recreation
+- Docker Compose down/up
+- Image rebuilds
+
+---
+
+# Database Initialization
+
+The SQL initialization script is mounted into PostgreSQL.
+
+```yaml
+volumes:
+  - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+```
+
+When PostgreSQL starts for the first time, it automatically executes:
+
+```
+database/init.sql
+```
+
+This creates the required database tables without any manual intervention.
+
+---
+
+# Health Check
+
+A PostgreSQL health check was added.
+
+```yaml
+healthcheck:
+  test: ["CMD-SHELL","pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+  start_period: 10s
+```
+
+The health check continuously verifies that PostgreSQL is ready to accept connections.
+
+---
+
+# depends_on
+
+The application depends on PostgreSQL.
+
+```yaml
+depends_on:
+  db:
+    condition: service_healthy
+```
+
+Instead of starting immediately, Docker Compose waits until PostgreSQL reports a healthy status.
+
+Startup sequence:
+
+```text
+PostgreSQL
+      │
+Health Check
+      │
+Healthy
+      │
+Application Starts
+```
+
+---
+
+# Verify Persistence
+
+1. Start the application.
+
+```bash
+docker compose up -d
+```
+
+2. Create a few tasks.
+
+3. Stop the stack.
+
+```bash
+docker compose down
+```
+
+4. Start the stack again.
+
+```bash
+docker compose up -d
+```
+
+The previously created tasks remain available because the database is stored in a persistent Docker volume.
+
+---
+
+# Verify Health
+
+Check service status:
+
+```bash
+docker compose ps
+```
+
+Example:
+
+```text
+NAME            STATUS
+Task-Manager    Up
+postgres-db     Up (healthy)
+```
+
+The `(healthy)` status confirms that PostgreSQL passed its health check.
+
+---
+
+# Stage 4 Summary
+
+At the end of Stage 4, the application became significantly more reliable and production-ready.
+
+### Achievements
+
+- Added a named Docker volume
+- Enabled persistent PostgreSQL storage
+- Automated database initialization
+- Externalized configuration using a `.env` file
+- Added PostgreSQL health checks
+- Configured service dependencies using `depends_on`
+- Ensured the application starts only after the database is healthy
+
+---
+
+# Stage 5 — Deploy the Application
+
+The final stage focused on preparing the application for deployment by publishing the Docker image to Docker Hub and placing an Nginx reverse proxy in front of the application.
+
+---
+
+## Objectives
+
+- Tag the application image
+- Push the image to Docker Hub
+- Configure an Nginx reverse proxy
+- Deploy the complete stack using Docker Compose
+- Document the deployment process
+
+---
+
+# Docker Hub
+
+
+## Login to Docker Hub
+
+```bash
+docker login
+```
+
+---
+
+## Push the Image
+
+```bash
+docker push <dockerhub-username>/task-manager:v1
+```
+
+---
+
+## Verify
+
+Visit your Docker Hub repository and confirm that the image has been uploaded successfully.
+
+---
+
+# Nginx Reverse Proxy
+
+Instead of exposing the Node.js application directly to users, an Nginx container is placed in front of the application.
+
+```
+Browser
+     │
+     ▼
+ Nginx (Port 80)
+     │
+     ▼
+Node.js App
+     │
+     ▼
+ PostgreSQL
+```
+
+Benefits of using Nginx:
+
+- Acts as a reverse proxy
+- Handles incoming client requests
+- Forwards requests to the application
+- Hides the application container from clients
+- Provides a production-ready architecture
+- Can be extended later for SSL, caching, and load balancing
+
+---
+
+# Nginx Configuration
+
+```nginx
+events {}
+
+http {
+
+    server {
+
+        listen 80;
+
+        location / {
+
+            proxy_pass http://app:3000;
+
+            proxy_http_version 1.1;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+        }
+
+    }
+
+}
+```
+
+---
+
+# Docker Compose Architecture
+
+```
+                 Browser
+                     │
+                     ▼
+              Nginx (Port 80)
+                     │
+                     ▼
+            Node.js Application
+                     │
+                     ▼
+             PostgreSQL Database
+                     │
+                     ▼
+            Docker Named Volume
+```
+
+---
+
+# Deploy From Scratch
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Usman-Ghani-Devops/task-manager-node-postgres.git
+
+cd task-manager-node-postgres
+```
+
+---
+
+### 2. Create the Environment File
+
+Create a `.env` file in the project root.
+
+```env
+PORT=3000
+
+DB_HOST=postgres-db
+DB_PORT=5432
+DB_NAME=taskdb
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+POSTGRES_DB=taskdb
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+```
+
+---
+
+### 3. Start the Complete Stack
+
+```bash
+docker compose up -d
+```
+
+Docker Compose will automatically:
+
+- Build the application image
+- Start PostgreSQL
+- Initialize the database
+- Wait until PostgreSQL becomes healthy
+- Start the Node.js application
+- Start the Nginx reverse proxy
+
+---
+
+### 4. Verify Running Containers
+
+```bash
+docker compose ps
+```
+
+Expected output:
+
+```text
+NAME            STATUS
+Task-Manager    Up
+postgres-db     Up (healthy)
+nginx           Up
+```
+
+---
+
+### 5. Access the Application
+
+Open your browser:
+
+```
+http://localhost
+```
+
+Since Nginx is listening on port **80**, all requests are forwarded to the Node.js application running inside the Docker network.
+
+---
+
+# Useful Docker Compose Commands
+
+Start:
+
+```bash
+docker compose up -d
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+Rebuild:
+
+```bash
+docker compose up --build
+```
+
+Restart:
+
+```bash
+docker compose restart
+```
+
+View logs:
+
+```bash
+docker compose logs
+```
+
+Application logs:
+
+```bash
+docker compose logs app
+```
+
+Database logs:
+
+```bash
+docker compose logs db
+```
+
+Nginx logs:
+
+```bash
+docker compose logs nginx
+```
+
+---
+
+
+# Future Improvements
+
+The project can be enhanced by adding:
+
+- HTTPS with Let's Encrypt
+- Multi-stage production deployments
+- CI/CD pipeline using GitHub Actions
+- Kubernetes deployment
+- Redis caching
+- Horizontal scaling with multiple application containers
+
+---
+
+# Learning Outcomes
+
+Through this project, the following Docker concepts were implemented and practiced:
+
+- Docker images
+- Docker containers
+- Dockerfiles
+- Multi-stage builds
+- Docker layer caching
+- Non-root containers
+- Image optimization
+- Docker Compose
+- Docker networking
+- Environment variables
+- PostgreSQL containerization
+- Named volumes
+- Health checks
+- Service dependencies
+- Docker Hub
+- Nginx reverse proxy
 
 ---
 
@@ -635,6 +1145,11 @@ Planned:
 
 **Usman Ghani**
 
-BS Software Engineering
+BS Software Engineering  
 
-Docker Learning Project
+
+---
+
+# License
+
+This project was developed for educational purposes as part of a Docker containerization assignment.

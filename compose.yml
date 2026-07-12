@@ -2,8 +2,6 @@ services:
     app:
         build: .
         container_name: "Task-Manager"
-        ports:
-        - "3000:3000"
         networks:
         - "Task-Manager-network"
         env_file:
@@ -14,8 +12,6 @@ services:
     db:
         image: postgres:17 
         container_name: "postgres-db"
-        ports:
-        - "5432:5432"
         networks:
         - "Task-Manager-network"
         env_file:
@@ -29,6 +25,18 @@ services:
             timeout: 5s
             retries: 5
             start_period: 10s 
+    nginx:
+        image: nginx:alpine
+        container_name: nginx
+        ports:
+         - "80:80"
+        volumes:
+         - ./nginx/nginx.config:/etc/nginx/nginx.conf:ro
+        depends_on:
+            app:
+                condition: service_started
+        networks:
+         - Task-Manager-network
 networks:
     "Task-Manager-network":
 volumes:
