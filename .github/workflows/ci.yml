@@ -1,0 +1,100 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build, Push and Deploy
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: eu-north-1
+      AWS_ACCOUNT_ID: 883291274628
+
+      APP_REPOSITORY: task-manager-app-ecr
+      POSTGRES_REPOSITORY: task-manager-postgres
+      NGINX_REPOSITORY: nginx-ecr
+
+      CLUSTER_NAME: TaskManager02
+      SERVICE_NAME: task-manager02-service-nxu3jehx
+      TASK_DEFINITION: task-definition.json
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+]
+      - name: Build App Image
+        run: docker build -t $APP_REPOSITORY:latest .
+
+      - name: Tag App Image
+        run: docker tag $APP_REPOSITORY:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP_REPOSITORY:latest
+
+      - name: Push App Image
+        run: docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP_REPOSITORY:latest
+
+
+      - name: Build PostgreSQL Image
+        run: docker build -t $POSTGRES_REPOSITORY:latest ./database
+
+      - name: Tag PostgreSQL Image
+        run: docker tag $POSTGRES_REPOSITORY:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$POSTGRES_REPOSITORY:latest
+
+      - name: Push PostgreSQL Image
+        run: docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$POSTGRES_REPOSITORY:latest
+
+      - name: Build Nginx Image
+        run: docker build -t $NGINX_REPOSITORY:latest ./nginx
+
+      - name: Tag Nginx Image
+        run: docker tag $NGINX_REPOSITORY:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$NGINX_REPOSITORY:latest
+
+      - name: Push Nginx Image
+        run: docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$NGINX_REPOSITORY:latest
+
+      - name: Update App Image
+        id: app-task
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.TASK_DEFINITION }}
+          container-name: App
+          image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.APP_REPOSITORY }}:latest
+
+      - name: Update PostgreSQL Image
+        id: postgres-task
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.app-task.outputs.task-definition }}
+          container-name: postgres-db
+          image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.POSTGRES_REPOSITORY }}:latest
+
+      - name: Update Nginx Image
+        id: nginx-task
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.postgres-task.outputs.task-definition }}
+          container-name: nginx
+          image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.NGINX_REPOSITORY }}:latest
+
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.nginx-task.outputs.task-definition }}
+          cluster: ${{ env.CLUSTER_NAME }}
+          service: ${{ env.SERVICE_NAME }}
+          wait-for-service-stability: true
