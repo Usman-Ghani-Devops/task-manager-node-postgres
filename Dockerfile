@@ -11,6 +11,7 @@ WORKDIR /app/
 COPY package*.json ./
 
 RUN npm install --omit=dev && npm cache clean --force
+RUN apt-get update && apt-get install -y curl
 
 COPY . .
 
@@ -26,6 +27,10 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/src ./src  
 COPY --from=builder /app/database ./database
 COPY --from=builder /app/node_modules ./node_modules
+
+RUN apt-get update \
+    && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 3000 
 USER node

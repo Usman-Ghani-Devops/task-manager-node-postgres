@@ -1,5 +1,8 @@
 node_modules/
 
+aws/
+awscliv2.zip
+.agent.env
 .env
 
 logs/

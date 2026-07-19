@@ -17,12 +17,19 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Routes
+// Health check endpoint for ECS
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        status: "healthy"
+    });
+});
+
+// Application routes
 app.use("/", taskRoutes);
 
-// Start Server
+// Start server
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
 });
