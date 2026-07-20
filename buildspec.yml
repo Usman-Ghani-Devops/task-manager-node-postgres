@@ -72,9 +72,6 @@ phases:
         ]
         EOF
 
-      - echo "===== IMAGE DEFINITIONS ====="
-      - cat imagedefinitions.json
-
 artifacts:
   files:
     - imagedefinitions.json
