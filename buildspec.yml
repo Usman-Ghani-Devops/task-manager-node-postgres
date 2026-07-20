@@ -1,0 +1,69 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: eu-north-1
+    AWS_ACCOUNT_ID: "883291274628"
+
+    APP_REPOSITORY: task-manager-app-ecr
+    POSTGRES_REPOSITORY: task-manager-postgres
+    NGINX_REPOSITORY: nginx-ecr
+
+phases:
+  install:
+    commands:
+      - echo "Install Phase"
+
+  pre_build:
+    commands:
+      - echo "Pre Build Phase"
+      - echo "Logging in to Amazon ECR"
+
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+
+      - APP_IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$APP_REPOSITORY:$IMAGE_TAG
+      - POSTGRES_IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$POSTGRES_REPOSITORY:$IMAGE_TAG
+      - NGINX_IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NGINX_REPOSITORY:$IMAGE_TAG
+
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+
+  build:
+    commands:
+      - echo "Build Phase"
+
+      - echo "Building App Image"
+      - docker build -t $APP_REPOSITORY:$IMAGE_TAG .
+      - docker tag $APP_REPOSITORY:$IMAGE_TAG $APP_IMAGE_URI
+
+      - echo "Building PostgreSQL Image"
+      - docker build -t $POSTGRES_REPOSITORY:$IMAGE_TAG ./database
+      - docker tag $POSTGRES_REPOSITORY:$IMAGE_TAG $POSTGRES_IMAGE_URI
+
+      - echo "Building Nginx Image"
+      - docker build -t $NGINX_REPOSITORY:$IMAGE_TAG ./nginx
+      - docker tag $NGINX_REPOSITORY:$IMAGE_TAG $NGINX_IMAGE_URI
+
+  post_build:
+    commands:
+      - echo "Post Build Phase"
+
+      - echo "Pushing App Image"
+      - docker push $APP_IMAGE_URI
+
+      - echo "Pushing PostgreSQL Image"
+      - docker push $POSTGRES_IMAGE_URI
+
+      - echo "Pushing Nginx Image"
+      - docker push $NGINX_IMAGE_URI
+
+      - echo "Creating imagedefinitions.json"
+
+      - printf '[{"name":"App","imageUri":"%s"},{"name":"postgres-db","imageUri":"%s"},{"name":"nginx","imageUri":"%s"}]' \
+        "$APP_IMAGE_URI" \
+        "$POSTGRES_IMAGE_URI" \
+        "$NGINX_IMAGE_URI" \
+        > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
