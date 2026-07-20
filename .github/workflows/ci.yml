@@ -55,15 +55,20 @@ jobs:
       - name: Authenticate snyk
         run:  snyk auth ${{ secrets.SNYK_TOKEN }}
 
+      - name: Verify Docker Image
+        run: docker images
+
+      - name: Verify Snyk
+        run: snyk whoami
+
       - name: Scan App image
-        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG --json > app-snyk-report.json
+        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG 
 
       - name: Scan Postgresql image
-        run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG --json > postgresql-snyk-report.json
+        run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG
 
       - name: Scan nginx image
-        run: snyk container test $NGINX_REPOSITORY:$IMAGE_TAG --json > nginx-snyk-report.json
-
+        run: snyk container test $NGINX_REPOSITORY:$IMAGE_TAG 
       - name: Upload Snyk Reports
         uses: actions/upload-artifact@v4
         with:
@@ -86,13 +91,7 @@ jobs:
 
           body: |
             Docker security scan failed.
-            Snyk Found vulnerabilities
-
-            attachments: |
-              app-snyk-report.json
-              postgresql-snyk-report.json
-              nginx-snyk-report.json
-
+           
             Repository:
             ${{ github.repository }}
 
