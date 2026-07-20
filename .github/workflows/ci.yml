@@ -43,6 +43,60 @@ jobs:
       - name: Build App Image
         run: docker build -t $APP_REPOSITORY:$IMAGE_TAG .
 
+      - name: Build PostgreSQL Image
+        run: docker build -t $POSTGRES_REPOSITORY:$IMAGE_TAG ./database
+      
+      - name: Build Nginx Image
+        run: docker build -t $NGINX_REPOSITORY:$IMAGE_TAG ./nginx
+
+      - name: Install synk cli
+        run: npm install -g synk
+      
+      - name: Authenticate synk
+        run:  snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: Scan App image
+        run:  synk container test $APP_REPOSITORY:$IMAGE_TAG --json > app-synk-report.json
+
+      - name: Scan Postgresql image
+        run: synk container test $POSTGRES_REPOSITORY:$IMAGE_TAG --json > postgresql-synk-report.json
+
+      - name: Scan nginx image
+        run: synk container test $NGINX_REPOSITORY:$IMAGE_TAG --json > nginx-synk-report.json
+
+      - name: Upload Snyk Reports
+        uses: actions/upload-artifact@v4
+        with:
+         name: snyk-reports
+         path: |
+           *-snyk-report.json
+      
+
+      - name: Send Email On Failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+
+          subject: "Snyk Security Scan Failed"
+
+          body: |
+            Docker security scan failed.
+
+            Repository:
+            ${{ github.repository }}
+
+            Check report:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          to: usman328ghani@gmail.com
+          from: usman328ghani@gmail.com
+    
+
       - name: Tag App Image
         run: docker tag $APP_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP_REPOSITORY:$IMAGE_TAG
 
@@ -50,8 +104,7 @@ jobs:
         run: docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP_REPOSITORY:$IMAGE_TAG
 
 
-      - name: Build PostgreSQL Image
-        run: docker build -t $POSTGRES_REPOSITORY:$IMAGE_TAG ./database
+      
 
       - name: Tag PostgreSQL Image
         run: docker tag $POSTGRES_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$POSTGRES_REPOSITORY:$IMAGE_TAG
@@ -59,14 +112,15 @@ jobs:
       - name: Push PostgreSQL Image
         run: docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$POSTGRES_REPOSITORY:$IMAGE_TAG
 
-      - name: Build Nginx Image
-        run: docker build -t $NGINX_REPOSITORY:$IMAGE_TAG ./nginx
+      
 
       - name: Tag Nginx Image
         run: docker tag $NGINX_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$NGINX_REPOSITORY:$IMAGE_TAG
 
       - name: Push Nginx Image
         run: docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$NGINX_REPOSITORY:$IMAGE_TAG
+
+      
 
       - name: Update App Image
         id: app-task
