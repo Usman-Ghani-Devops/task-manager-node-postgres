@@ -45,8 +45,6 @@ phases:
 
   post_build:
     commands:
-      - echo "Post Build Phase"
-
       - echo "Pushing App Image"
       - docker push $APP_IMAGE_URI
 
@@ -56,13 +54,26 @@ phases:
       - echo "Pushing Nginx Image"
       - docker push $NGINX_IMAGE_URI
 
-      - echo "Creating imagedefinitions.json"
+      - |
+        cat > imagedefinitions.json <<EOF
+        [
+          {
+            "name":"App",
+            "imageUri":"$APP_IMAGE_URI"
+          },
+          {
+            "name":"postgres-db",
+            "imageUri":"$POSTGRES_IMAGE_URI"
+          },
+          {
+            "name":"nginx",
+            "imageUri":"$NGINX_IMAGE_URI"
+          }
+        ]
+        EOF
 
-      - printf '[{"name":"App","imageUri":"%s"},{"name":"postgres-db","imageUri":"%s"},{"name":"nginx","imageUri":"%s"}]' \
-        "$APP_IMAGE_URI" \
-        "$POSTGRES_IMAGE_URI" \
-        "$NGINX_IMAGE_URI" \
-        > imagedefinitions.json
+      - echo "===== IMAGE DEFINITIONS ====="
+      - cat imagedefinitions.json
 
 artifacts:
   files:
