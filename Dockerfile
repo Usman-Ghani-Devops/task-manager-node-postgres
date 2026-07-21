@@ -1,5 +1,4 @@
 ARG NODE_VERSION=22-slim
-
 FROM node:${NODE_VERSION} AS builder
 
 LABEL maintainer="Usman Ghani"
@@ -16,7 +15,9 @@ RUN npm install -g npm@latest \
 
 
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl \
+    && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,7 +37,9 @@ COPY --from=builder --chown=node:node /app/database ./database
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl \
+    && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

@@ -41,7 +41,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
         
       - name: Build App Image
-        run: docker build -t $APP_REPOSITORY:$IMAGE_TAG .
+        run:  docker build --pull -t $APP_REPOSITORY:$IMAGE_TAG .
 
       - name: Build PostgreSQL Image
         run: docker build -t $POSTGRES_REPOSITORY:$IMAGE_TAG ./database
