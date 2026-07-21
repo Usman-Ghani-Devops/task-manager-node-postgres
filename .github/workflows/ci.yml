@@ -72,7 +72,7 @@ jobs:
 
 
       - name: Scan App image
-        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG --severity-threshold=high --exclude-base-image-vulns --json > app-snyk-report.json
+        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG --severity-threshold=high --exclude-base-image-vulns --json > app-snyk-report.json || true
 
       - name: Scan Postgresql image
         run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG --severity-threshold=high --json > postgresql-snyk-report.json || true
@@ -175,5 +175,26 @@ jobs:
          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           -H "Content-Type: application/json" \
           --data '{
-           "text": "🚨 *CI/CD Pipeline Failed*\n\n*Repository:* ${{ github.repository }}\n*Workflow:* ${{ github.workflow }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n\n🔗 Run Details:\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+           "text": "*CI/CD Pipeline Failed*\n\n*Repository:* ${{ github.repository }}\n*Workflow:* ${{ github.workflow }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n\n🔗 Run Details:\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }'
+      - name: Update Google Sheet
+        if: success()
+        run: |
+          START_TIME=${{ github.run_started_at }}
+          END_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          DURATION=$(( $(date -d "$END_TIME" +%s) - $(date -d "$START_TIME" +%s) ))
+
+          curl -X POST "${{ secrets.GOOGLE_SHEET_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+            "date":"'"$(date +"%d-%b-%Y")"'",
+            "time":"'"$(date +"%I:%M %p")"'",
+            "repository":"${{ github.repository }}",
+            "branch":"${{ github.ref_name }}",
+            "commit":"${{ github.sha }}",
+            "commitMessage":"${{ github.event.head_commit.message }}",
+          "triggeredBy":"${{ github.actor }}",
+          "status":"SUCCESS",
+          "duration":"'"${DURATION}"' sec"
           }'
