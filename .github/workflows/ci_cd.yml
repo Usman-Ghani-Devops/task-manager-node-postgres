@@ -169,6 +169,22 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           wait-for-service-stability: true
 
+
+      - name: Slack Notification - Success
+        if: success()
+        run: |
+         curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H 'Content-type: application/json' \
+          --data "{
+          \"text\": \"*Deployment Successful*\n
+          Repository: ${{ github.repository }}\n
+          Branch: ${{ github.ref_name }}\n
+          Commit: ${{ github.sha }}\n
+          Triggered by: ${{ github.actor }}\n
+          Workflow: ${{ github.workflow }}\n
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+          }"
+
       - name: Notify Slack on Failure
         if: failure()
         run: |
@@ -177,6 +193,7 @@ jobs:
           --data '{
            "text": "*CI/CD Pipeline Failed*\n\n*Repository:* ${{ github.repository }}\n*Workflow:* ${{ github.workflow }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n\n🔗 Run Details:\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }'
+          
       - name: Update Google Sheet
         if: success()
         run: |
@@ -188,8 +205,8 @@ jobs:
           curl -X POST "${{ secrets.GOOGLE_SHEET_WEBHOOK }}" \
             -H "Content-Type: application/json" \
             -d '{
-            "date":"'"$(date +"%d-%b-%Y")"'",
-            "time":"'"$(date +"%I:%M %p")"'",
+            TIME=$(TZ="Asia/Karachi" date +"%I:%M %p")
+            DATE=$(TZ="Asia/Karachi" date +"%Y-%m-%d")
             "repository":"${{ github.repository }}",
             "branch":"${{ github.ref_name }}",
             "commit":"${{ github.sha }}",
