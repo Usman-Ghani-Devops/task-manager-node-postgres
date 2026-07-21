@@ -13,6 +13,8 @@ jobs:
   build-and-deploy:
     name: Build, Push and Deploy
     runs-on: ubuntu-latest  
+    enviornment:
+     name: production
 
     env:
       AWS_REGION: eu-north-1
@@ -62,7 +64,7 @@ jobs:
         run: snyk whoami
 
       - name: Scan App image
-        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG   --policy-path=.snyk --severity-threshold=high  --exclude-base-image-vulns --json > app-snyk-report.json || true
+        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG   --poli --severity-threshold=high  --exclude-base-image-vulns --json > app-snyk-report.json || true
 
       - name: Scan Postgresql image
         run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG --severity-threshold=high --json > postgresql-snyk-report.json || true
