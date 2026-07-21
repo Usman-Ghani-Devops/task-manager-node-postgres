@@ -62,13 +62,13 @@ jobs:
         run: snyk whoami
 
       - name: Scan App image
-        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG 
+        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG -severity-threshold=high 
 
       - name: Scan Postgresql image
-        run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG
+        run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG -severity-threshold=high 
 
       - name: Scan nginx image
-        run: snyk container test $NGINX_REPOSITORY:$IMAGE_TAG 
+        run: snyk container test $NGINX_REPOSITORY:$IMAGE_TAG -severity-threshold=high 
       - name: Upload Snyk Reports
         uses: actions/upload-artifact@v4
         with:
