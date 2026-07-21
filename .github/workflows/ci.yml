@@ -62,7 +62,7 @@ jobs:
         run: snyk whoami
 
       - name: Scan App image
-        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG   --policy-path=.snyk -severity-threshold=high 
+        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG   --policy-path=.snyk --severity-threshold=high 
 
       - name: Scan Postgresql image
         run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG -severity-threshold=high 
