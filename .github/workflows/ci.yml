@@ -13,8 +13,7 @@ jobs:
   build-and-deploy:
     name: Build, Push and Deploy
     runs-on: ubuntu-latest  
-    environment:
-     name: production
+
 
     env:
       AWS_REGION: eu-north-1
