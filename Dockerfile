@@ -10,8 +10,15 @@ WORKDIR /app/
 
 COPY package*.json ./
 
-RUN npm install --omit=dev && npm cache clean --force
-RUN apt-get update && apt-get install -y curl
+
+RUN npm install -g npm@latest \
+    && npm ci --omit=dev
+
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
@@ -19,18 +26,20 @@ FROM node:${NODE_VERSION}
 
 LABEL maintainer="Usman Ghani"
 LABEL description="Task Manager application built with Node.js and PostgreSQL"
-LABEL stage="builder"
+LABEL stage="runtime"
 
 WORKDIR /app/
 
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/src ./src  
-COPY --from=builder /app/database ./database
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/package*.json ./
+COPY --from=builder --chown=node:node /app/src ./src  
+COPY --from=builder --chown=node:node /app/database ./database
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
 RUN apt-get update \
-    && apt-get install -y curl \
+    && apt-get install -y --no-install-recommends curl \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
 
 EXPOSE 3000 
 USER node
