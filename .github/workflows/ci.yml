@@ -72,7 +72,7 @@ jobs:
 
 
       - name: Scan App image
-        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG   --poli --severity-threshold=high  --exclude-base-image-vulns --json > app-snyk-report.json || true
+        run:  snyk container test $APP_REPOSITORY:$IMAGE_TAG --severity-threshold=high --exclude-base-image-vulns --json > app-snyk-report.json
 
       - name: Scan Postgresql image
         run: snyk container test $POSTGRES_REPOSITORY:$IMAGE_TAG --severity-threshold=high --json > postgresql-snyk-report.json || true
